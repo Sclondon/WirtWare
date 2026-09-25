@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://microgames/catch/catch.gd" id="1_catch"]
+
+[node name="Catch" type="Node2D"]
+script = ExtResource("1_catch")

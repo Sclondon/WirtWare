@@ -1,0 +1,88 @@
+# WirtWare
+
+Rapid-fire microgames in the style of WarioWare, made with Godot 4.7.
+
+Each microgame lasts a few seconds. You see a one-word prompt, then you have to work out what to do before the fuse runs out. Win to score, lose to drop a heart. Every 4 wins the game speeds up. Later games also get harder.
+
+## Controls
+
+| Action | Keyboard | Gamepad | Touch |
+| --- | --- | --- | --- |
+| Move | Arrow keys / WASD | D-pad / left stick | On-screen arrows |
+| Action | Space / Z / Enter | A | On-screen A button |
+| Pointer games | Mouse | — | Finger |
+
+On phones, each microgame shows only the buttons it needs. On tall screens the buttons sit in a controller area under the game. On wide screens they float over the bottom corners.
+
+## Microgames
+
+| Prompt | Folder | What you do |
+| --- | --- | --- |
+| DODGE! | `dodge` | Move left and right to avoid falling rocks until time runs out |
+| PUMP IT! | `pump` | Mash the action button to inflate a balloon until it pops |
+| CATCH! | `catch` | Slide a basket under a falling apple |
+| STOP! | `stop` | Press the button while the needle is in the green zone |
+| POP 'EM! | `pop` | Click every balloon |
+| JUMP! | `jump` | Jump over the cacti |
+| COPY! | `copy` | Press the arrow sequence shown, in order |
+| DRAW! | `duel` | Wait for "FIRE!", then shoot. Too early or too late loses |
+| LAND! | `land` | Hold the button to thrust, and touch down slowly |
+| SORT! | `sort` | Send circles to the left bin and squares to the right |
+| WHACK! | `whack` | Press the arrow that matches the mole's hole. A wrong swing loses |
+| SCRUB! | `scrub` | Hold the mouse button and scrub the grime off a plate |
+| SLICE! | `slice` | Swipe the mouse through every fruit before it falls |
+
+## Project layout
+
+```
+scenes/main.tscn            Entry scene (just runs scripts/main.gd)
+scripts/main.gd             Game loop, HUD, speed-ups, lives, best score
+scripts/microgame.gd        `Microgame` base class that every game extends
+scripts/hearts.gd           Lives display
+scripts/touch_controls.gd   On-screen buttons for phones
+tools/autopilot.gd          Plays by itself, for recording the arcade attract video
+build/                      Web export, served by GitHub Pages
+microgames/<name>/<name>.tscn   One folder per microgame (found automatically)
+```
+
+## Adding a microgame
+
+1. Create `microgames/<name>/<name>.tscn` with a `Node2D` root. Give the root a script that `extends Microgame`.
+2. Set the prompt and settings in `_init()`:
+   ```gdscript
+   extends Microgame
+
+   func _init() -> void:
+       prompt = "SHAKE!"            # the big instruction word
+       controls_hint = "ARROW KEYS" # small hint under it
+       duration = 4.0               # seconds before speed-up
+       win_on_timeout = false       # true for "survive until time's up" games
+       touch_hint = "TAP THE BUTTON" # hint shown on touch screens instead
+       controls = Controls.BUTTON   # touch buttons: BUTTON, LEFT_RIGHT, ARROWS or POINTER
+   ```
+3. Set up the round in `_on_start()`. `difficulty` (1–3) is already set at this point.
+4. Call `win()` or `lose()` when the outcome is decided. Guard input with `is_playing()`.
+5. The screen is 1280×720. Keep the bottom ~40px clear, because the fuse bar sits there.
+
+The main loop picks up the new folder automatically. To test one game over and over, select the `Main` node and set **Debug Microgame** in the inspector. You can also press F6 to run the microgame scene by itself.
+
+Speed-ups work through `Engine.time_scale`. Use `delta`, timers and tweens as normal and they all speed up together.
+
+## Web build and the Scareathon arcade
+
+WirtWare runs as a cabinet in the Scareathon arcade. The page loads `https://sclondon.github.io/WirtWare/build/index.html` in an iframe. At game over the game posts `{ type: 'PLAYER_DIED', score }` to the parent page, where the score is the number of microgames won.
+
+To publish a new build:
+
+```
+godot --headless --path . --export-release "Web" build/index.html
+git add build && git commit -m "Update web build" && git push
+```
+
+Then bump the `?v=` cache-buster on `WIRTWARE_URL` in the arcade page (`src/pages/Arcade/page.tsx` in scareathon-v3) to the new commit hash.
+
+To re-record the attract video, run the game on autopilot with the movie maker, then convert the result to a 960×540 mp4 in `public/game-recordings/WirtWare.mp4`:
+
+```
+godot --path . --write-movie attract.avi --fixed-fps 30 --resolution 1280x720 --quit-after 560 -- --autopilot
+```
