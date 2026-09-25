@@ -14,11 +14,8 @@ const GAMES_PER_SPEEDUP := 4
 const SPEEDUP_STEP := 0.15
 const MAX_SPEED := 2.2
 const GAMES_PER_DIFFICULTY := 8
-const FUSE_RECT := Rect2(100, 686, 1160, 22)
-## On screens this much taller than 16:9 (in viewport units), the touch buttons
-## get their own area under the game instead of floating over it.
-const MIN_PAD_HEIGHT := 400.0
-const PAD_HEIGHT_PX := 330.0
+## The fuse runs along the top, since touch buttons can cover the bottom.
+const FUSE_RECT := Rect2(96, 26, 596, 24)
 const CURTAIN_COLORS: Array[Color] = [
 	Color("ff5a5f"), Color("ffb400"), Color("00a699"),
 	Color("7b5cff"), Color("fc642d"), Color("3ec1d3"),
@@ -180,7 +177,7 @@ func _game_over() -> void:
 	curtain.visible = true
 	curtain.color = Color("222831")
 	hearts.visible = false
-	_set_big_text("GAME OVER", 150)
+	_set_big_text("GAME OVER", 104)
 	small_label.text = "SCORE %d   BEST %d" % [score, best]
 	_pop(big_label)
 	# Short delay so frantic mashing doesn't instantly restart.
@@ -194,7 +191,7 @@ func _show_title() -> void:
 	curtain.visible = true
 	curtain.color = CURTAIN_COLORS[0]
 	hearts.visible = false
-	_set_big_text("WIRTWARE", 180)
+	_set_big_text("WIRTWARE", 120)
 	small_label.text = "BEST %d" % best if best > 0 else ""
 	hint_label.text = _start_hint()
 	hint_label.visible = true
@@ -218,7 +215,7 @@ func _pick_microgame() -> PackedScene:
 # --- HUD --------------------------------------------------------------------
 
 func _build_hud() -> void:
-	# The game area is always 1280x720; _layout() places it on screens of other shapes.
+	# The game area is always 720x1280; _layout() places it on screens of other shapes.
 	game_frame = _make_frame()
 	game_frame.name = "GameFrame"
 	add_child(game_frame)
@@ -247,22 +244,18 @@ func _build_hud() -> void:
 	hud_root.add_child(curtain)
 	curtain.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
-	small_label = _make_label(64, curtain)
-	small_label.offset_bottom = -460
-	big_label = _make_label(200, curtain)
-	big_label.offset_bottom = -60
+	small_label = _make_label(52, curtain, 340)
+	big_label = _make_label(200, curtain, 580)
 
 	hearts = Hearts.new()
 	hearts.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	curtain.add_child(hearts)
 	hearts.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	hearts.offset_top = 470
+	hearts.offset_top = 760
 
-	prompt_label = _make_label(130, hud_root)
-	prompt_label.offset_bottom = -140
+	prompt_label = _make_label(100, hud_root, 520)
 	prompt_label.visible = false
-	hint_label = _make_label(40, hud_root)
-	hint_label.offset_top = 260
+	hint_label = _make_label(36, hud_root, 660)
 	hint_label.visible = false
 
 	fuse = Control.new()
@@ -284,7 +277,7 @@ func _build_hud() -> void:
 	fuse_label.add_theme_font_size_override("font_size", 56)
 	fuse_label.add_theme_constant_override("outline_size", 14)
 	fuse_label.add_theme_color_override("font_outline_color", Color.BLACK)
-	fuse_label.position = Vector2(30, 640)
+	fuse_label.position = Vector2(22, -4)
 	fuse.add_child(fuse_label)
 
 
@@ -296,28 +289,19 @@ func _make_frame() -> Control:
 	return frame
 
 
-## Centers the game on wide screens; on tall ones, stacks the game above a
-## touch controller area.
+## Centers the 720x1280 game on the screen. On touch screens it sits at the top
+## instead, so a tall phone's spare height goes under it, where the buttons are.
 func _layout() -> void:
 	var view := get_viewport().get_visible_rect().size
 	var window_px := Vector2(get_window().size) / DisplayServer.screen_get_scale()
 	var unit := view.x / window_px.x if window_px.x > 0 else 1.0
 	Microgame.units_per_pixel = unit
-	var extra_height := view.y - Microgame.SCREEN.y
-	var portrait := touch.enabled and extra_height >= MIN_PAD_HEIGHT
-	var game_pos: Vector2
-	var pad: Rect2
-	if portrait:
-		var pad_height := minf(extra_height, PAD_HEIGHT_PX * unit)
-		var top := floorf((extra_height - pad_height) / 2)
-		game_pos = Vector2(0, top)
-		pad = Rect2(0, top + Microgame.SCREEN.y, view.x, pad_height)
-	else:
-		game_pos = ((view - Microgame.SCREEN) / 2).floor()
-		pad = Rect2(Vector2.ZERO, view)
+	var game_pos := ((view - Microgame.SCREEN) / 2).floor()
+	if touch.enabled:
+		game_pos.y = 0.0
 	game_frame.position = game_pos
 	hud_root.position = game_pos
-	touch.set_layout(pad, portrait, unit)
+	touch.set_layout(Rect2(Vector2.ZERO, view), unit)
 
 
 func _on_touch_detected() -> void:
@@ -326,15 +310,21 @@ func _on_touch_detected() -> void:
 		hint_label.text = _start_hint()
 
 
-func _make_label(font_size: int, parent: Node) -> Label:
+## A full-width label whose text is centered on [param center_y].
+func _make_label(font_size: int, parent: Node, center_y: float) -> Label:
 	var label := Label.new()
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.add_theme_font_size_override("font_size", font_size)
 	label.add_theme_constant_override("outline_size", maxi(int(font_size / 5.0), 8))
 	label.add_theme_color_override("font_outline_color", Color.BLACK)
 	parent.add_child(label)
-	label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	label.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	label.offset_left = 20
+	label.offset_right = -20
+	label.offset_top = center_y - font_size * 1.5
+	label.offset_bottom = center_y + font_size * 1.5
 	return label
 
 

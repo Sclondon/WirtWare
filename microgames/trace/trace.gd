@@ -1,8 +1,10 @@
 extends Microgame
-## TRACE! Drag along the wiggly path from start to finish without straying off it.
+## TRACE! Drag down the wiggly path from start to finish without straying off it.
 
 const SAMPLES := 64
 const LOOKAHEAD := 8
+const TOP := 200.0
+const BOTTOM := 1120.0
 
 var path := PackedVector2Array()
 ## How far from the centre line the pointer may be.
@@ -23,11 +25,11 @@ func _init() -> void:
 
 func _on_start() -> void:
 	var waves := 1.0 + 0.75 * difficulty
-	var amplitude := 90.0 + 30.0 * difficulty
+	var amplitude := 150.0 + 30.0 * difficulty
 	var phase := randf() * TAU
 	for i in SAMPLES:
 		var t := float(i) / (SAMPLES - 1)
-		path.append(Vector2(lerpf(170, 1110, t), 400 + sin(t * waves * TAU + phase) * amplitude))
+		path.append(Vector2(SCREEN.x / 2 + sin(t * waves * TAU + phase) * amplitude, lerpf(TOP, BOTTOM, t)))
 	width = touch_size([65.0, 52.0, 42.0][difficulty - 1], 22)
 
 
@@ -81,6 +83,6 @@ func _draw() -> void:
 		draw_circle(pointer, 16, Color("ef476f"))
 	if strayed:
 		draw_circle(pointer, 22, Color("ef476f"))
-		draw_text_centered("OFF THE PATH!", Vector2(640, 130), 70, Color("ef476f"))
+		draw_text_centered("OFF THE PATH!", Vector2(360, 110), 64, Color("ef476f"))
 	elif is_resolved and won:
-		draw_text_centered("NAILED IT!", Vector2(640, 130), 70, Color("06d6a0"))
+		draw_text_centered("NAILED IT!", Vector2(360, 110), 64, Color("06d6a0"))

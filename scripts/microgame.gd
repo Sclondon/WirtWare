@@ -16,7 +16,11 @@ signal resolved(won: bool)
 ## POINTER games use the mouse, which touch drives directly, so they show no buttons.
 enum Controls { BUTTON, LEFT_RIGHT, ARROWS, POINTER }
 
-const SCREEN := Vector2(1280, 720)
+## The game is portrait-first: every microgame is laid out for this 9:16 canvas.
+## For games that use touch buttons (BUTTON, LEFT_RIGHT, ARROWS), keep the action
+## above CONTROLS_TOP; on shorter phones the buttons float over the area below it.
+const SCREEN := Vector2(720, 1280)
+const CONTROLS_TOP := 1060.0
 
 ## The big one-word instruction flashed at the start ("DODGE!", "CATCH!").
 @export var prompt := "GO!"

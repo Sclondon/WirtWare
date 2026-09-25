@@ -1,9 +1,9 @@
 extends Microgame
-## SLICE! Swipe the mouse through every fruit before it falls back down.
+## SLICE! Swipe through every fruit before it falls back down.
 
-const GRAVITY := 1100.0
+const GRAVITY := 1600.0
 const MIN_SWIPE := 12.0
-const RADIUS := 48.0
+const RADIUS := 50.0
 const TRAIL_LENGTH := 8
 const COLORS: Array[Color] = [Color("fb8500"), Color("80b918"), Color("7209b7"), Color("ffd60a"), Color("e63946")]
 
@@ -20,8 +20,7 @@ class Fruit:
 var fruits: Array[Fruit] = []
 var elapsed := 0.0
 var trail: Array[Vector2] = []
-var last_mouse := Vector2.ZERO
-var was_pressed := false
+var last_pointer := Vector2.ZERO
 
 
 func _init() -> void:
@@ -29,28 +28,26 @@ func _init() -> void:
 	controls_hint = "SWIPE THE MOUSE"
 	touch_hint = "SWIPE YOUR FINGER"
 	controls = Controls.POINTER
-	duration = 4.0
+	duration = 4.5
 
 
 func _on_start() -> void:
+	# Tossed from below the screen; they peak somewhere in the middle third.
 	for i in 1 + difficulty:
 		var fruit := Fruit.new()
 		fruit.color = COLORS[i % COLORS.size()]
-		fruit.pos = Vector2(randf_range(250, 1030), SCREEN.y + RADIUS)
-		fruit.vel = Vector2((640 - fruit.pos.x) * randf_range(0.2, 0.5), -randf_range(950, 1100))
+		fruit.pos = Vector2(randf_range(140, SCREEN.x - 140), SCREEN.y + RADIUS)
+		fruit.vel = Vector2((SCREEN.x / 2 - fruit.pos.x) * randf_range(0.2, 0.5), -randf_range(1550, 1750))
 		fruit.launch_at = 0.4 + i * 0.35 + randf() * 0.2
 		fruits.append(fruit)
-	last_mouse = get_local_mouse_position()
 
 
 func _process(delta: float) -> void:
-	var mouse := get_local_mouse_position()
-	var pressed := Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
-	if pressed and not was_pressed:
+	update_pointer()
+	if pointer_pressed:
 		# A finger landing starts a new swipe instead of drawing a line from where the last one lifted.
-		last_mouse = mouse
-	was_pressed = pressed
-	var swiping := mouse.distance_to(last_mouse) >= MIN_SWIPE
+		last_pointer = pointer
+	var swiping := pointer.distance_to(last_pointer) >= MIN_SWIPE
 	elapsed += delta
 	for fruit in fruits:
 		if not fruit.launched:
@@ -61,20 +58,20 @@ func _process(delta: float) -> void:
 		if fruit.sliced:
 			fruit.split += delta
 		elif is_playing():
-			var closest := Geometry2D.get_closest_point_to_segment(fruit.pos, last_mouse, mouse)
-			if swiping and closest.distance_to(fruit.pos) < RADIUS:
+			var closest := Geometry2D.get_closest_point_to_segment(fruit.pos, last_pointer, pointer)
+			if swiping and closest.distance_to(fruit.pos) < touch_size(RADIUS, 24):
 				fruit.sliced = true
-				fruit.slice_angle = (mouse - last_mouse).angle()
+				fruit.slice_angle = (pointer - last_pointer).angle()
 			elif fruit.pos.y > SCREEN.y + RADIUS and fruit.vel.y > 0.0:
 				lose()
 	if is_playing() and fruits.all(func(f: Fruit) -> bool: return f.sliced):
 		win()
 
 	if swiping:
-		trail.append(mouse)
+		trail.append(pointer)
 	if trail.size() > TRAIL_LENGTH or (not swiping and not trail.is_empty()):
 		trail.pop_front()
-	last_mouse = mouse
+	last_pointer = pointer
 	queue_redraw()
 
 

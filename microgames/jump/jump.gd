@@ -1,12 +1,12 @@
 extends Microgame
 ## JUMP! Hop over the cacti rushing toward you.
 
-const GROUND_Y := 560.0
-const PLAYER_X := 280.0
-const PLAYER_SIZE := Vector2(60, 70)
-const CACTUS_SIZE := Vector2(46, 90)
+const GROUND_Y := 900.0
+const PLAYER_X := 160.0
+const PLAYER_SIZE := Vector2(64, 76)
+const CACTUS_SIZE := Vector2(50, 100)
 const GRAVITY := 2800.0
-const JUMP_VELOCITY := -1000.0
+const JUMP_VELOCITY := -1300.0
 
 var player_y := GROUND_Y
 var velocity_y := 0.0
@@ -26,10 +26,11 @@ func _init() -> void:
 
 func _on_start() -> void:
 	scroll_speed = 600.0 + 120.0 * difficulty
-	var x := SCREEN.x + randf_range(0, 300)
+	var x := SCREEN.x + randf_range(350, 600)
 	cacti.append(x)
 	if difficulty >= 2:
-		cacti.append(x + randf_range(750, 900))
+		# Far enough apart to land from the first jump before the second.
+		cacti.append(x + scroll_speed * randf_range(1.15, 1.35))
 
 
 func _process(delta: float) -> void:
@@ -60,21 +61,26 @@ func _cactus_rect(x: float) -> Rect2:
 
 func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, SCREEN), Color("ffe8d6"))
-	draw_circle(Vector2(1050, 150), 80, Color("ffb703"))
+	draw_circle(Vector2(540, 260), 90, Color("ffb703"))
+	for i in 3:
+		draw_colored_polygon(PackedVector2Array([
+			Vector2(i * 300 - 100, GROUND_Y), Vector2(i * 300 + 60, GROUND_Y - 220 - i * 40), Vector2(i * 300 + 220, GROUND_Y),
+		]), Color("f4c7a8"))
 	draw_rect(Rect2(0, GROUND_Y, SCREEN.x, SCREEN.y - GROUND_Y), Color("cb997e"))
-	for i in 18:
+	for i in 11:
 		var x := fposmod(i * 90.0 - scroll, SCREEN.x + 90) - 45
 		draw_line(Vector2(x, GROUND_Y + 30), Vector2(x + 30, GROUND_Y + 30), Color("a47148"), 4)
 
 	for x in cacti:
 		var r := _cactus_rect(x)
-		draw_rect(r, Color("2d6a4f"))
-		draw_rect(Rect2(r.position + Vector2(-20, 25), Vector2(20, 12)), Color("2d6a4f"))
-		draw_rect(Rect2(r.position + Vector2(-20, 5), Vector2(12, 30)), Color("2d6a4f"))
-		draw_rect(Rect2(r.position + Vector2(r.size.x, 35), Vector2(20, 12)), Color("2d6a4f"))
-		draw_rect(Rect2(r.position + Vector2(r.size.x + 8, 15), Vector2(12, 30)), Color("2d6a4f"))
+		var green := Color("2d6a4f")
+		draw_rect(r, green)
+		draw_rect(Rect2(r.position + Vector2(-20, 30), Vector2(20, 12)), green)
+		draw_rect(Rect2(r.position + Vector2(-20, 8), Vector2(12, 34)), green)
+		draw_rect(Rect2(r.position + Vector2(r.size.x, 40), Vector2(20, 12)), green)
+		draw_rect(Rect2(r.position + Vector2(r.size.x + 8, 18), Vector2(12, 34)), green)
 
 	var hurt := is_resolved and not won
 	var body := _player_rect()
 	draw_rect(body, Color("777777") if hurt else Color("3a86ff"))
-	draw_face(body.get_center() + Vector2(0, -6), 36, not hurt)
+	draw_face(body.get_center() + Vector2(0, -6), 38, not hurt)

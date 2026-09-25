@@ -2,10 +2,11 @@ extends Microgame
 ## SORT! Toss each falling item into the matching bin: circles left, squares right.
 
 const COLORS: Array[Color] = [Color("e63946"), Color("457b9d")]
-const BIN_X: Array[float] = [230.0, 1050.0]
-const BIN_TOP := 540.0
-const START_Y := 110.0
-const FLOOR_Y := 500.0
+const BIN_X: Array[float] = [130.0, 590.0]
+const BIN_TOP := 860.0
+const BIN_BOTTOM := 1010.0
+const START_Y := 170.0
+const FLOOR_Y := 780.0
 const ITEM_SIZE := 45.0
 
 class Tossed:
@@ -16,7 +17,7 @@ class Tossed:
 var remaining := 3
 var item_side := 0
 var item_pos := Vector2.ZERO
-var item_speed := 450.0
+var item_speed := 500.0
 var spawn_delay := 0.5
 var tossed: Array[Tossed] = []
 
@@ -26,18 +27,18 @@ func _init() -> void:
 	controls_hint = "LEFT / RIGHT"
 	touch_hint = "LEFT / RIGHT"
 	controls = Controls.LEFT_RIGHT
-	duration = 4.5
+	duration = 5.0
 
 
 func _on_start() -> void:
 	remaining = 2 + difficulty
-	item_speed = 380.0 + 90.0 * difficulty
+	item_speed = 500.0 + 110.0 * difficulty
 	_next_item()
 
 
 func _next_item() -> void:
 	item_side = randi() % 2
-	item_pos = Vector2(640, START_Y)
+	item_pos = Vector2(SCREEN.x / 2, START_Y)
 
 
 func _process(delta: float) -> void:
@@ -70,7 +71,7 @@ func _toss(dir: int) -> void:
 	t.pos = item_pos
 	t.side = item_side
 	var target_x := BIN_X[0 if dir < 0 else 1]
-	var flight_time := 0.5
+	var flight_time := 0.45
 	t.vel = Vector2((target_x - item_pos.x) / flight_time, (BIN_TOP - item_pos.y) / flight_time - 900.0 * flight_time)
 	tossed.append(t)
 	if (dir < 0) != (item_side == 0):
@@ -105,10 +106,10 @@ func _draw() -> void:
 	for side in 2:
 		var x := BIN_X[side]
 		draw_colored_polygon(PackedVector2Array([
-			Vector2(x - 110, BIN_TOP), Vector2(x + 110, BIN_TOP), Vector2(x + 85, 680), Vector2(x - 85, 680),
+			Vector2(x - 100, BIN_TOP), Vector2(x + 100, BIN_TOP), Vector2(x + 80, BIN_BOTTOM), Vector2(x - 80, BIN_BOTTOM),
 		]), COLORS[side].darkened(0.3))
-		var icon := Vector2(x, 610)
+		var icon := Vector2(x, (BIN_TOP + BIN_BOTTOM) / 2)
 		if side == 0:
-			draw_circle(icon, 28, Color.WHITE)
+			draw_circle(icon, 30, Color.WHITE)
 		else:
-			draw_rect(Rect2(icon - Vector2(28, 28), Vector2(56, 56)), Color.WHITE)
+			draw_rect(Rect2(icon - Vector2(30, 30), Vector2(60, 60)), Color.WHITE)

@@ -1,9 +1,10 @@
 extends Microgame
 ## DRAW! Wait for the signal, then shoot first. Fire too early and you lose.
 
-const GROUND_Y := 540.0
-const PLAYER_X := 260.0
-const RIVAL_X := 1020.0
+const GROUND_Y := 880.0
+const PLAYER_X := 150.0
+const RIVAL_X := 570.0
+const SIGN_POS := Vector2(360, 320)
 
 var elapsed := 0.0
 var signal_time := 1.5
@@ -42,7 +43,8 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, SCREEN), Color("f4a261"))
-	draw_circle(Vector2(640, 470), 150, Color("ffd166"))
+	draw_rect(Rect2(0, 0, SCREEN.x, 300), Color("e76f51"))
+	draw_circle(Vector2(360, GROUND_Y - 40), 190, Color("ffd166"))
 	draw_rect(Rect2(0, GROUND_Y, SCREEN.x, SCREEN.y - GROUND_Y), Color("e9c46a"))
 
 	var player_state := 0
@@ -58,11 +60,11 @@ func _draw() -> void:
 	_draw_cowboy(RIVAL_X, -1.0, Color("9b2226"), rival_state)
 
 	if too_soon:
-		draw_text_centered("TOO SOON!", Vector2(640, 200), 110, Color("ef476f"))
+		draw_text_centered("TOO SOON!", SIGN_POS, 100, Color("ef476f"))
 	elif elapsed >= signal_time and not (is_resolved and not won):
-		draw_text_centered("FIRE!", Vector2(640, 200), 150, Color("ef476f") if not is_resolved else Color.WHITE)
+		draw_text_centered("FIRE!", SIGN_POS, 150, Color("ef476f") if not is_resolved else Color.WHITE)
 	elif is_resolved and not won:
-		draw_text_centered("TOO SLOW!", Vector2(640, 200), 110, Color("ef476f"))
+		draw_text_centered("TOO SLOW!", SIGN_POS, 100, Color("ef476f"))
 
 
 ## state: 0 = standing, 1 = shooting, 2 = down.
@@ -72,7 +74,7 @@ func _draw_cowboy(x: float, facing: float, color: Color, state: int) -> void:
 		var fallen_head := Vector2(x - facing * 85, GROUND_Y - 22)
 		draw_circle(fallen_head, 24, Color("f1c27d"))
 		draw_face(fallen_head, 30, false)
-		draw_rect(Rect2(x - facing * 150 - 25, GROUND_Y - 12, 50, 12), Color("6f4518"))
+		draw_rect(Rect2(x + facing * 70 - 25, GROUND_Y - 12, 50, 12), Color("6f4518"))
 		return
 
 	draw_rect(Rect2(x - 22, GROUND_Y - 120, 44, 120), color)

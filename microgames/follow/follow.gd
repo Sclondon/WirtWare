@@ -5,7 +5,8 @@ extends Microgame
 const GRACE := 1.3
 ## How long you can slip off it before it escapes.
 const SLIP := 0.25
-const HOME := Vector2(640, 380)
+const HOME := Vector2(360, 640)
+const WANDER := Vector2(250, 450)
 
 var fly := HOME
 var radius := 90.0
@@ -27,8 +28,8 @@ func _init() -> void:
 
 
 func _ready() -> void:
-	for i in 40:
-		stars.append(Vector2(randf() * SCREEN.x, randf() * 450))
+	for i in 60:
+		stars.append(Vector2(randf() * SCREEN.x, randf() * 900))
 
 
 func _on_start() -> void:
@@ -41,7 +42,7 @@ func _fly_position(t: float) -> Vector2:
 	# Two sine waves at odd ratios so it wanders instead of looping. It starts
 	# still and widens its path over the grace period.
 	var spread := clampf(t / GRACE, 0.0, 1.0)
-	return HOME + Vector2(sin(t * speed * 1.3 + phase.x) * 430, sin(t * speed * 1.9 + phase.y) * 220) * spread
+	return HOME + Vector2(sin(t * speed * 1.9 + phase.x), sin(t * speed * 1.3 + phase.y)) * WANDER * spread
 
 
 func _process(delta: float) -> void:
@@ -50,7 +51,7 @@ func _process(delta: float) -> void:
 	if not (is_resolved and not won):
 		fly = _fly_position(elapsed)
 	else:
-		fly += Vector2(500, -500) * delta  # It got away.
+		fly += Vector2(400, -700) * delta  # It got away.
 	on_it = pointer_down and pointer.distance_to(fly) < radius
 	if is_playing() and elapsed > GRACE:
 		off_time = 0.0 if on_it else off_time + delta
@@ -63,8 +64,8 @@ func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, SCREEN), Color("0d1b2a"))
 	for star in stars:
 		draw_circle(star, 2, Color(1, 1, 1, 0.6))
-	for i in 9:
-		draw_circle(Vector2(i * 160, SCREEN.y + 40), 140, Color("1b263b"))
+	for i in 6:
+		draw_circle(Vector2(i * 150, SCREEN.y + 60), 170, Color("1b263b"))
 
 	var ring := Color("06d6a0") if on_it else Color(1, 1, 1, 0.5)
 	if elapsed < GRACE and not on_it:
@@ -75,4 +76,4 @@ func _draw() -> void:
 	draw_circle(fly, 9, Color("fcf6bd"))
 
 	if is_resolved:
-		draw_text_centered("GOT IT!" if won else "IT GOT AWAY!", Vector2(640, 120), 70, Color("06d6a0") if won else Color("ef476f"))
+		draw_text_centered("GOT IT!" if won else "IT GOT AWAY!", Vector2(360, 110), 64, Color("06d6a0") if won else Color("ef476f"))

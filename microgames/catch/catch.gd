@@ -1,11 +1,11 @@
 extends Microgame
 ## CATCH! Slide the basket under the falling apple.
 
-const BASKET_Y := 600.0
+const BASKET_Y := 900.0
 const BASKET_W := 170.0
-const BASKET_SPEED := 760.0
+const BASKET_SPEED := 700.0
 const APPLE_R := 32.0
-const GROUND_Y := 680.0
+const GROUND_Y := 990.0
 
 var basket_x := SCREEN.x / 2
 var apple := Vector2.ZERO
@@ -22,13 +22,24 @@ func _init() -> void:
 
 
 func _on_start() -> void:
-	apple = Vector2(randf_range(150, SCREEN.x - 150), 110)
-	# Start the basket well away from the apple so the player has to move.
-	basket_x = fposmod(apple.x - 100 + randf_range(400, 700), SCREEN.x - 200) + 100
+	apple = Vector2(randf_range(110, SCREEN.x - 110), 170)
 	var fall_time := 2.6 - 0.35 * difficulty
 	apple_vel.y = (BASKET_Y - apple.y) / fall_time
 	if difficulty >= 2:
-		apple_vel.x = randf_range(180, 360) * (1.0 if randf() < 0.5 else -1.0)
+		apple_vel.x = randf_range(150, 280) * (1.0 if randf() < 0.5 else -1.0)
+	# Start the basket well away from where the apple will land, so the player has to move.
+	var landing := _landing_x(fall_time)
+	var half := BASKET_W / 2
+	var gap := randf_range(250, 400)
+	basket_x = landing + gap if landing + gap < SCREEN.x - half else landing - gap
+	basket_x = clampf(basket_x, half, SCREEN.x - half)
+
+
+## Where the apple reaches the basket, bouncing off the walls on the way.
+func _landing_x(fall_time: float) -> float:
+	var span := SCREEN.x - 2 * APPLE_R
+	var x := fposmod(apple.x - APPLE_R + apple_vel.x * fall_time, 2 * span)
+	return APPLE_R + (x if x <= span else 2 * span - x)
 
 
 func _process(delta: float) -> void:
@@ -55,10 +66,10 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, SCREEN), Color("fefae0"))
-	draw_rect(Rect2(0, GROUND_Y + APPLE_R - 10, SCREEN.x, 100), Color("a7c957"))
+	draw_rect(Rect2(0, GROUND_Y + APPLE_R - 10, SCREEN.x, SCREEN.y), Color("a7c957"))
 	# Tree canopy along the top.
-	for i in 12:
-		draw_circle(Vector2(i * 120 + 20, 20 + (i % 2) * 30), 90, Color("386641"))
+	for i in 8:
+		draw_circle(Vector2(i * 100 + 10, 40 + (i % 2) * 40), 100, Color("386641"))
 
 	var splat := is_resolved and not won
 	if splat:

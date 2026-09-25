@@ -1,12 +1,13 @@
 extends Microgame
-## FEED! Drag each snack into the monster's mouth.
+## FEED! Drag each snack up into the monster's mouth.
 
 const MONSTER_RADIUS := 150.0
-const MOUTH_RADIUS := 70.0
-const FOOD_RADIUS := 42.0
+const MOUTH_RADIUS := 72.0
+const FOOD_RADIUS := 44.0
+const MONSTER_HOME := Vector2(360, 330)
 const SPAWN_AWAY := Vector2(-1000, -1000)
 
-var monster := Vector2(980, 380)
+var monster := MONSTER_HOME
 var food := Vector2.ZERO
 var food_kind := 0
 var holding := false
@@ -26,15 +27,12 @@ func _init() -> void:
 
 func _on_start() -> void:
 	total = 1 + difficulty
-	if randf() < 0.5:
-		monster.x = SCREEN.x - monster.x
 	_spawn_food()
 
 
 func _spawn_food() -> void:
 	food_kind = randi() % 3
-	var x := clampf(SCREEN.x - monster.x + randf_range(-140, 140), 120, SCREEN.x - 120)
-	food = Vector2(x, randf_range(180, 580))
+	food = Vector2(randf_range(110, SCREEN.x - 110), randf_range(780, 1130))
 	holding = false
 
 
@@ -47,7 +45,7 @@ func _process(delta: float) -> void:
 	elapsed += delta
 	chomp = maxf(chomp - delta * 4.0, 0.0)
 	if difficulty == 3:
-		monster.y = 380 + sin(elapsed * 2.5) * 140
+		monster.x = MONSTER_HOME.x + sin(elapsed * 2.5) * 170
 
 	if is_playing():
 		if pointer_pressed and pointer.distance_to(food) < touch_size(FOOD_RADIUS * 1.4, 40):
@@ -69,7 +67,8 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, SCREEN), Color("ffe5ec"))
-	draw_text_centered("%d / %d" % [eaten, total], Vector2(640, 70), 56)
+	draw_rect(Rect2(0, 700, SCREEN.x, SCREEN.y - 700), Color("ffc2d1"))
+	draw_text_centered("%d / %d" % [eaten, total], Vector2(360, 610), 56)
 
 	# Monster: horns, body, eyes that watch the food, and a chomping mouth.
 	var body := Color("7209b7")
@@ -93,7 +92,7 @@ func _draw() -> void:
 			var tooth := mouth + Vector2(-54 + i * 36, -55.0 * open + 4)
 			draw_colored_polygon(PackedVector2Array([tooth + Vector2(-12, 0), tooth + Vector2(12, 0), tooth + Vector2(0, 18)]), Color.WHITE)
 	if is_resolved and not won:
-		draw_text_centered("STILL HUNGRY...", monster + Vector2(0, -230), 44, Color("7209b7"))
+		draw_text_centered("STILL HUNGRY...", Vector2(360, 110), 50, Color("7209b7"))
 
 	if food == SPAWN_AWAY:
 		return
@@ -108,6 +107,6 @@ func _draw() -> void:
 				draw_circle(food + p, 6, Color("5c4033"))
 		2:
 			draw_circle(food, FOOD_RADIUS, Color("ff8fab"))
-			draw_circle(food, FOOD_RADIUS * 0.35, Color("ffe5ec"))
+			draw_circle(food, FOOD_RADIUS * 0.35, Color("ffc2d1"))
 	if holding:
 		draw_arc(food, FOOD_RADIUS + 10, 0, TAU, 32, Color(1, 1, 1, 0.8), 4)

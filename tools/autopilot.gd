@@ -53,16 +53,16 @@ func _process(delta: float) -> void:
 				poke_timer = 0.22
 				_tap(game.sequence[game.progress])
 		"sort":
-			if game.spawn_delay <= 0.0 and game.item_pos.y > 260:
+			if game.spawn_delay <= 0.0 and game.item_pos.y > 420:
 				_tap("left" if game.item_side == 0 else "right")
 		"stop":
-			if game.needle_x > game.zone.position.x + 12 and game.needle_x < game.zone.end.x - 12:
+			if game.needle_y > game.zone.position.y + 12 and game.needle_y < game.zone.end.y - 12:
 				_tap("action")
 		"duel":
 			if game.elapsed >= game.signal_time + 0.15:
 				_tap("action")
 		"land":
-			_hold("action", game.velocity > game.safe_speed * 0.8 and game.ship.y > 380)
+			_hold("action", game.velocity > game.safe_speed * 0.8 and game.ship.y > 600)
 		"catch":
 			var gap: float = game.apple.x - game.basket_x
 			_hold("left", gap < -20)

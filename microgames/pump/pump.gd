@@ -1,8 +1,9 @@
 extends Microgame
 ## PUMP IT! Mash the button to inflate the balloon until it pops.
 
-const BALLOON_POS := Vector2(560, 300)
-const PUMP_POS := Vector2(1000, 600)
+const BALLOON_POS := Vector2(330, 440)
+const PUMP_POS := Vector2(560, 900)
+const GROUND_Y := 960.0
 
 var air := 0.0
 var needed := 10.0
@@ -35,22 +36,22 @@ func _process(delta: float) -> void:
 
 
 func _balloon_radius() -> float:
-	return 50.0 + 170.0 * clampf(air / needed, 0.0, 1.0)
+	return 60.0 + 200.0 * clampf(air / needed, 0.0, 1.0)
 
 
 func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, SCREEN), Color("ffd6e0"))
-	draw_rect(Rect2(0, 640, SCREEN.x, 80), Color("c9a0dc"))
+	draw_rect(Rect2(0, GROUND_Y, SCREEN.x, SCREEN.y - GROUND_Y), Color("c9a0dc"))
 
 	# Pump: box, handle that dips on each press, and a hose to the balloon.
-	var handle_y := PUMP_POS.y - 150 + pump_kick * 50
+	var handle_y := PUMP_POS.y - 170 + pump_kick * 60
 	draw_line(Vector2(PUMP_POS.x, handle_y), PUMP_POS, Color("444444"), 12)
-	draw_line(Vector2(PUMP_POS.x - 60, handle_y), Vector2(PUMP_POS.x + 60, handle_y), Color("222222"), 20)
-	draw_rect(Rect2(PUMP_POS - Vector2(50, 30), Vector2(100, 70)), Color("3a86ff"))
+	draw_line(Vector2(PUMP_POS.x - 65, handle_y), Vector2(PUMP_POS.x + 65, handle_y), Color("222222"), 22)
+	draw_rect(Rect2(PUMP_POS - Vector2(55, 30), Vector2(110, 90)), Color("3a86ff"))
 
 	var r := _balloon_radius()
 	var knot := BALLOON_POS + Vector2(0, r)
-	var hose := PackedVector2Array([PUMP_POS + Vector2(-50, 20), Vector2(760, 620), Vector2(BALLOON_POS.x, 620), knot])
+	var hose := PackedVector2Array([PUMP_POS + Vector2(-55, 40), Vector2(BALLOON_POS.x, PUMP_POS.y + 40), knot])
 	draw_polyline(hose, Color("333333"), 6)
 
 	if is_resolved and won:

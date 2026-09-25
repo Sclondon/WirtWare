@@ -12,7 +12,7 @@ Each microgame lasts a few seconds. You see a one-word prompt, then you have to 
 | Action | Space / Z / Enter | A | On-screen A button |
 | Pointer games | Mouse | — | Finger |
 
-On phones, each microgame shows only the buttons it needs. On tall screens the buttons sit in a controller area under the game. On wide screens they float over the bottom corners.
+WirtWare is portrait-first: the game is a 720×1280 (9:16) canvas, laid out for a phone held upright. On phones, each microgame shows only the buttons it needs, along the bottom edge. On tall phones they sit in the spare space under the game. On shorter ones they float over the game's floor.
 
 ## Microgames
 
@@ -70,7 +70,7 @@ microgames/<name>/<name>.tscn   One folder per microgame (found automatically)
    ```
 3. Set up the round in `_on_start()`. `difficulty` (1–3) is already set at this point.
 4. Call `win()` or `lose()` when the outcome is decided. Guard input with `is_playing()`.
-5. The screen is 1280×720. Keep the bottom ~40px clear, because the fuse bar sits there.
+5. The screen is 720×1280 (portrait). The fuse bar runs along the top. If the game uses touch buttons (`BUTTON`, `LEFT_RIGHT`, `ARROWS`), keep the action above `CONTROLS_TOP` (y = 1060), because on shorter phones the buttons cover the area below it. `POINTER` games can use the whole screen.
 
 The main loop picks up the new folder automatically. To test one game over and over, select the `Main` node and set **Debug Microgame** in the inspector. You can also press F6 to run the microgame scene by itself.
 
@@ -78,7 +78,7 @@ Speed-ups work through `Engine.time_scale`. Use `delta`, timers and tweens as no
 
 ## Web build and the Scareathon arcade
 
-WirtWare runs as a cabinet in the Scareathon arcade. The page loads `https://sclondon.github.io/WirtWare/build/index.html` in an iframe. At game over the game posts `{ type: 'PLAYER_DIED', score }` to the parent page, where the score is the number of microgames won.
+WirtWare runs as a cabinet in the Scareathon arcade. The page loads `https://sclondon.github.io/WirtWare/build/index.html` in a 9:16 iframe. At game over the game posts `{ type: 'PLAYER_DIED', score }` to the parent page, where the score is the number of microgames won.
 
 To publish a new build:
 
@@ -89,8 +89,8 @@ git add build && git commit -m "Update web build" && git push
 
 Then bump the `?v=` cache-buster on `WIRTWARE_URL` in the arcade page (`src/pages/Arcade/page.tsx` in scareathon-v3) to the new commit hash.
 
-To re-record the attract video, run the game on autopilot with the movie maker, then convert the result to a 960×540 mp4 in `public/game-recordings/WirtWare.mp4`:
+To re-record the attract video, run the game on autopilot with the movie maker, then convert the result to a 540×960 mp4 in `public/game-recordings/WirtWare.mp4`:
 
 ```
-godot --path . --write-movie attract.avi --fixed-fps 30 --resolution 1280x720 --quit-after 560 -- --autopilot
+godot --path . --write-movie attract.avi --fixed-fps 30 --resolution 720x1280 --quit-after 560 -- --autopilot
 ```

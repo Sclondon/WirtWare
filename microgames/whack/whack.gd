@@ -2,13 +2,13 @@ extends Microgame
 ## WHACK! Bonk each mole with the arrow key for its hole. Swinging at the wrong hole loses.
 
 const HOLES := {
-	"up": Vector2(640, 250),
-	"left": Vector2(390, 420),
-	"right": Vector2(890, 420),
-	"down": Vector2(640, 580),
+	"up": Vector2(360, 330),
+	"left": Vector2(165, 590),
+	"right": Vector2(555, 590),
+	"down": Vector2(360, 850),
 }
 const DIRECTIONS := {"up": Vector2.UP, "down": Vector2.DOWN, "left": Vector2.LEFT, "right": Vector2.RIGHT}
-const HOLE_RADII := Vector2(90, 28)
+const HOLE_RADII := Vector2(85, 28)
 const RISE_TIME := 0.08
 
 var needed := 3
@@ -79,12 +79,14 @@ func _pop_mole() -> void:
 
 func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, SCREEN), Color("80b918"))
-	draw_text_centered("%d / %d" % [hits, needed], Vector2(1140, 80), 60)
+	for i in 12:
+		draw_circle(Vector2(fposmod(i * 173.0, SCREEN.x), 150 + i * 83), 6, Color("70a800"))
+	draw_text_centered("%d / %d" % [hits, needed], Vector2(360, 120), 60)
 
 	for hole: String in HOLES:
 		var center: Vector2 = HOLES[hole]
 		draw_colored_polygon(ellipse_points(center, HOLE_RADII), Color("3e2723"))
-		draw_arrow(center + Vector2(150, 0), DIRECTIONS[hole], 60, Color(1, 1, 1, 0.8))
+		draw_arrow(center + Vector2(0, 80), DIRECTIONS[hole], 50, Color(1, 1, 1, 0.8))
 
 		var showing_bonk := hole == bonked_hole and bonk_timer > 0.0
 		var lost_here := hole == bonked_hole and is_resolved and not won

@@ -1,10 +1,10 @@
 extends Microgame
 ## WIND IT! Spin your finger around the crank until the jack-in-the-box pops.
 
-const BOX := Rect2(360, 340, 300, 270)
-const CRANK_CENTER := Vector2(740, 470)
-const CRANK_LENGTH := 90.0
-const GUIDE_RADIUS := 140.0
+const BOX := Rect2(210, 430, 300, 270)
+const CRANK_CENTER := Vector2(360, 960)
+const CRANK_LENGTH := 100.0
+const GUIDE_RADIUS := 170.0
 
 var turns_needed := 3.0
 ## Net radians wound; spinning back and forth cancels out.
@@ -37,7 +37,7 @@ func _process(delta: float) -> void:
 	elapsed += delta
 	if is_playing():
 		var offset := pointer - CRANK_CENTER
-		var in_reach := offset.length() > 20 and offset.length() < touch_size(280, 130)
+		var in_reach := offset.length() > 20 and offset.length() < touch_size(320, 150)
 		if pointer_down and in_reach:
 			var angle := offset.angle()
 			if spinning:
@@ -54,7 +54,7 @@ func _process(delta: float) -> void:
 
 
 func _draw() -> void:
-	for i in 17:
+	for i in 10:
 		draw_rect(Rect2(i * 80, 0, 80, SCREEN.y), Color("fdffb6") if i % 2 == 0 else Color("ffd6a5"))
 	draw_rect(Rect2(0, BOX.end.y, SCREEN.x, SCREEN.y - BOX.end.y), Color("bc6c25"))
 
@@ -76,6 +76,8 @@ func _draw() -> void:
 		draw_circle(head + Vector2(0, 2), 12, Color("e63946"))
 		draw_colored_polygon(PackedVector2Array([head + Vector2(-50, -40), head + Vector2(50, -40), head + Vector2(0, -120)]), Color("3a86ff"))
 
+	# A drive shaft down to the crank.
+	draw_line(Vector2(CRANK_CENTER.x, box.end.y), CRANK_CENTER, Color("6c757d"), 16)
 	draw_rect(box, Color("e63946"))
 	draw_rect(box.grow(-24), Color("f28482"))
 	draw_text_centered("?", box.get_center(), 120, Color.WHITE)
@@ -86,10 +88,10 @@ func _draw() -> void:
 		draw_rect(Rect2(box.position.x - 12, lid_y - 20, box.size.x + 24, 22), Color("9d0208"))
 
 	# Where to spin, how far along you are, and the crank itself.
-	draw_arc(CRANK_CENTER, GUIDE_RADIUS, 0, TAU, 64, Color(0, 0, 0, 0.15), 18)
+	draw_arc(CRANK_CENTER, GUIDE_RADIUS, 0, TAU, 64, Color(0, 0, 0, 0.2), 20)
 	if progress > 0.0:
-		draw_arc(CRANK_CENTER, GUIDE_RADIUS, -PI / 2, -PI / 2 + TAU * progress, 64, Color("06d6a0"), 18)
+		draw_arc(CRANK_CENTER, GUIDE_RADIUS, -PI / 2, -PI / 2 + TAU * progress, 64, Color("06d6a0"), 20)
 	var knob := CRANK_CENTER + Vector2.from_angle(wound) * CRANK_LENGTH
-	draw_line(CRANK_CENTER, knob, Color("495057"), 14)
-	draw_circle(CRANK_CENTER, 16, Color("343a40"))
-	draw_circle(knob, 24, Color("ffbe0b"))
+	draw_line(CRANK_CENTER, knob, Color("495057"), 16)
+	draw_circle(CRANK_CENTER, 18, Color("343a40"))
+	draw_circle(knob, 28, Color("ffbe0b"))

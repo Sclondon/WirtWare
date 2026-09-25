@@ -2,8 +2,9 @@ extends Microgame
 ## COPY! Press the arrows in the order shown. One wrong key and you're out.
 
 const DIRECTIONS := {"up": Vector2.UP, "down": Vector2.DOWN, "left": Vector2.LEFT, "right": Vector2.RIGHT}
-const BOX := 120.0
-const ROW_Y := 470.0
+const BOX := 110.0
+const ROW_Y := 740.0
+const FACE_POS := Vector2(360, 330)
 
 var sequence: Array[String] = []
 var progress := 0
@@ -41,12 +42,12 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, SCREEN), Color("3d405b"))
-	draw_circle(Vector2(640, 190), 100, Color("f2cc8f"))
-	draw_face(Vector2(640, 190), 100, not (is_resolved and not won))
+	draw_circle(FACE_POS, 130, Color("f2cc8f"))
+	draw_face(FACE_POS, 130, not (is_resolved and not won))
 
 	var count := sequence.size()
 	for i in count:
-		var center := Vector2(640 + (i - (count - 1) / 2.0) * (BOX + 24), ROW_Y)
+		var center := Vector2(SCREEN.x / 2 + (i - (count - 1) / 2.0) * (BOX + 18), ROW_Y)
 		var box := Rect2(center - Vector2(BOX, BOX) / 2, Vector2(BOX, BOX))
 		var fill := Color("f4f1de")
 		if i < progress:

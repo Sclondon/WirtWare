@@ -1,8 +1,8 @@
 extends Microgame
-## POP 'EM! Click every balloon before time runs out.
+## POP 'EM! Tap every balloon before time runs out.
 
-const RADIUS := 55.0
-const PLAY_AREA := Rect2(80, 80, 1120, 520)
+const RADIUS := 62.0
+const PLAY_AREA := Rect2(90, 190, 540, 960)
 const COLORS: Array[Color] = [Color("ff006e"), Color("fb5607"), Color("ffbe0b"), Color("8338ec"), Color("3a86ff")]
 
 class Balloon:
@@ -41,13 +41,16 @@ func _free_spot() -> Vector2:
 	return spot
 
 
+# Taps are read as events rather than polled, so a quick tap that goes down and
+# up within one frame still counts.
 func _unhandled_input(event: InputEvent) -> void:
 	if not is_playing():
 		return
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		var click := get_local_mouse_position()
+		var tap := get_local_mouse_position()
+		var reach := touch_size(RADIUS * 1.15, 32)
 		for b in balloons:
-			if not b.popped and b.pos.distance_to(click) < RADIUS * 1.15:
+			if not b.popped and b.pos.distance_to(tap) < reach:
 				b.popped = true
 				break
 		if balloons.all(func(b: Balloon) -> bool: return b.popped):
@@ -68,18 +71,17 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, SCREEN), Color("caf0f8"))
+	for i in 4:
+		var cloud := Vector2(fposmod(i * 260.0 + 80, SCREEN.x), 260 + i * 270)
+		for j in 3:
+			draw_circle(cloud + Vector2(j * 50 - 50, (j % 2) * -20), 45, Color(1, 1, 1, 0.8))
 	for b in balloons:
 		if b.popped:
 			for i in 8:
 				var dir := Vector2.from_angle(TAU * i / 8.0)
-				draw_line(b.pos + dir * 20, b.pos + dir * 50, b.color, 6)
+				draw_line(b.pos + dir * 20, b.pos + dir * 55, b.color, 6)
 			continue
-		draw_line(b.pos + Vector2(0, RADIUS), b.pos + Vector2(8, RADIUS + 70), Color("555555"), 3)
+		draw_line(b.pos + Vector2(0, RADIUS), b.pos + Vector2(8, RADIUS + 80), Color("555555"), 3)
 		draw_circle(b.pos, RADIUS, b.color)
-		draw_circle(b.pos + Vector2(-18, -18), 10, Color(1, 1, 1, 0.5))
-		draw_face(b.pos, 50, not (is_resolved and not won))
-	if not is_resolved:
-		var mouse := get_local_mouse_position()
-		draw_arc(mouse, 22, 0, TAU, 24, Color.BLACK, 4)
-		draw_line(mouse - Vector2(32, 0), mouse + Vector2(32, 0), Color.BLACK, 3)
-		draw_line(mouse - Vector2(0, 32), mouse + Vector2(0, 32), Color.BLACK, 3)
+		draw_circle(b.pos + Vector2(-20, -20), 11, Color(1, 1, 1, 0.5))
+		draw_face(b.pos, 56, not (is_resolved and not won))
