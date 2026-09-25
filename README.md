@@ -31,6 +31,14 @@ On phones, each microgame shows only the buttons it needs. On tall screens the b
 | WHACK! | `whack` | Press the arrow that matches the mole's hole. A wrong swing loses |
 | SCRUB! | `scrub` | Hold the mouse button and scrub the grime off a plate |
 | SLICE! | `slice` | Swipe the mouse through every fruit before it falls |
+| TRACE! | `trace` | Drag along a wiggly path from start to finish without leaving it |
+| FLICK! | `flick` | Flick a paper ball into the bin. One shot, and the bin moves on harder levels |
+| FEED! | `feed` | Drag each snack into the monster's mouth |
+| WIND IT! | `crank` | Spin your finger around the crank until the jack-in-the-box pops |
+| FOLLOW! | `follow` | Keep your finger on the wandering firefly until time runs out |
+| SWIPE! | `swipe` | Swipe the way each arrow points. Red arrows mean the opposite way |
+
+The last six are built for touch screens but also work with a mouse (and SWIPE! with the arrow keys). Pointer games call `update_pointer()` each frame and read `pointer`, `pointer_down`, `pointer_pressed` and `pointer_released`. Use `touch_size()` for anything a finger has to hit, so it stays big enough on a small phone.
 
 ## Project layout
 

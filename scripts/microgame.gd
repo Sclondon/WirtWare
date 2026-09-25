@@ -30,11 +30,24 @@ const SCREEN := Vector2(1280, 720)
 ## Result when the timer runs out without win() or lose() being called.
 @export var win_on_timeout := false
 
+## Viewport units per screen pixel, kept up to date by main.gd. A portrait
+## phone squeezes the 1280-wide game into ~400px, so touch targets use this to
+## stay finger-sized. See touch_size().
+static var units_per_pixel := 1.0
+
 ## 1 (easy) to 3 (hard). Set by the main loop before start().
 var difficulty := 1
 var active := false
 var is_resolved := false
 var won := false
+
+## Pointer state: the mouse, or a finger on touch screens (touch drives the
+## mouse). Call update_pointer() at the top of _process to refresh it.
+var pointer := Vector2.ZERO
+var pointer_down := false
+## True only on the frame the button/finger went down or came up.
+var pointer_pressed := false
+var pointer_released := false
 
 
 func start() -> void:
@@ -68,6 +81,20 @@ func _resolve(result: bool) -> void:
 	won = result
 	_on_resolved(result)
 	resolved.emit(result)
+
+
+func update_pointer() -> void:
+	var down := Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
+	pointer = get_local_mouse_position()
+	pointer_pressed = down and not pointer_down
+	pointer_released = pointer_down and not down
+	pointer_down = down
+
+
+## A size of at least [param units] in game space, and at least [param pixels]
+## on the actual screen, so a fingertip can still hit it on a small phone.
+static func touch_size(units: float, pixels: float) -> float:
+	return maxf(units, pixels * units_per_pixel)
 
 
 # --- Overridables -----------------------------------------------------------

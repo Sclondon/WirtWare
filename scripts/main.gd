@@ -302,6 +302,7 @@ func _layout() -> void:
 	var view := get_viewport().get_visible_rect().size
 	var window_px := Vector2(get_window().size) / DisplayServer.screen_get_scale()
 	var unit := view.x / window_px.x if window_px.x > 0 else 1.0
+	Microgame.units_per_pixel = unit
 	var extra_height := view.y - Microgame.SCREEN.y
 	var portrait := touch.enabled and extra_height >= MIN_PAD_HEIGHT
 	var game_pos: Vector2
