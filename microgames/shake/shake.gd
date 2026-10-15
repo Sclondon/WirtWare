@@ -30,7 +30,7 @@ func _init() -> void:
 
 
 func _on_start() -> void:
-	theme = Stages.theme(stage)
+	theme = Stages.LOOKS.snow_globe
 	# Real time shrinks as the game speeds up, so ease off the shaking needed.
 	needed_dist = (1700.0 + 300.0 * difficulty) / sqrt(Engine.time_scale)
 	decay = 0.05 + 0.04 * difficulty
@@ -90,12 +90,12 @@ func _draw() -> void:
 	draw_rect(Rect2(0, 880, SCREEN.x, 10), theme.ground.lightened(0.25))
 
 	var o := GLOBE_POS + Vector2(wobble, -absf(wobble) * 0.3)
-	# Wooden base, banded in the stage's accent.
+	# Wooden base with a red band.
 	var wood: Color = theme.accent.darkened(0.55)
 	draw_colored_polygon(PackedVector2Array([o + Vector2(-190, 180), o + Vector2(190, 180), o + Vector2(240, 330), o + Vector2(-240, 330)]), wood)
 	draw_rect(Rect2(o + Vector2(-222, 270), Vector2(444, 22)), theme.accent)
 
-	# Inside the glass: the stage's little scene, the snow heap, and the flakes.
+	# Inside the glass: the little cottage, the snow heap, and the flakes.
 	draw_circle(o, GLOBE_R, theme.sky.lightened(0.12))
 	draw_circle(o + Vector2(0, 40), GLOBE_R * 0.8, Color(theme.glow, 0.08))
 	_draw_scene(o + Vector2(0, 95))
@@ -131,12 +131,20 @@ func _draw() -> void:
 		draw_line(flake_icon - Vector2.from_angle(a) * 22, flake_icon + Vector2.from_angle(a) * 22, theme.glow, 6)
 
 
+## A little cottage between two pines, with a lit window.
 func _draw_scene(at: Vector2) -> void:
-	match posmod(stage, 3):
-		Stages.GRAVEYARD:
-			draw_sprite("graveyard/grave_2", 1, 0, at + Vector2(60, -10), 4.0)
-			draw_sprite("graveyard/pumpkin", 6, anim_frame(6, 6), at + Vector2(-50, 30), 5.0)
-		Stages.TEMPLE:
-			draw_sprite("temple/t_totem_heads", 3, 0, at + Vector2(0, -10), 5.0)
-		Stages.SWAMP:
-			draw_sprite("swamp/h_frog", 1, 0, at + Vector2(0, 10), 7.0)
+	var pine := Color("2f5d4a")
+	for p: Vector3 in [Vector3(-115, 40, 1.0), Vector3(118, 50, 0.8)]:
+		var b := at + Vector2(p.x, p.y)
+		var s := p.z
+		draw_rect(Rect2(b + Vector2(-7, -10) * s, Vector2(14, 22) * s), Color("5b3a29"))
+		for tier in 3:
+			var w := (52.0 - tier * 12.0) * s
+			var y := b.y - (14.0 + tier * 30.0) * s
+			draw_colored_polygon(PackedVector2Array([Vector2(b.x - w, y), Vector2(b.x + w, y), Vector2(b.x, y - 48.0 * s)]), pine)
+	var wall := Rect2(at + Vector2(-50, -30), Vector2(100, 70))
+	draw_rect(wall, Color("b5653f"))
+	draw_colored_polygon(PackedVector2Array([wall.position + Vector2(-16, 2), wall.position + Vector2(116, 2), at + Vector2(0, -88)]), Color("f4f8ff"))
+	draw_rect(Rect2(at + Vector2(-34, -12), Vector2(26, 24)), Color("ffd27a"))
+	draw_rect(Rect2(at + Vector2(10, -4), Vector2(24, 44)), Color("5b3a29"))
+	draw_rect(Rect2(at + Vector2(22, -100), Vector2(14, 34)), Color("7a4a32"))

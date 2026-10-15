@@ -37,7 +37,7 @@ func _init() -> void:
 
 
 func _on_start() -> void:
-	theme = Stages.theme(stage)
+	theme = Stages.LOOKS.salmon_run
 	var steps: int = [2, 3, 4][difficulty - 1]
 	sweep = [0.95, 0.75, 0.62][difficulty - 1]
 	for i in steps + 1:
@@ -178,16 +178,17 @@ func _draw() -> void:
 		draw_text_centered("TOO SLOW!", Vector2(360, 120), 64, Color("ef476f"))
 
 
-## Stage dressing up in the jungle corners.
+## Jungle leaves hanging into the top corners.
 func _draw_props() -> void:
-	match stage:
-		Stages.GRAVEYARD:
-			draw_sprite("graveyard/bat", 4, anim_frame(8, 4), Vector2(620, 120 + sin(flow * 4.0) * 10), 4.0, true)
-		Stages.TEMPLE:
-			draw_sprite("temple/t_torch", 12, anim_frame(10, 6), Vector2(135, 120), 5.0)
-			draw_sprite("temple/t_torch", 12, anim_frame(10, 6, 0.15), Vector2(585, 120), 5.0, true)
-		_:
-			draw_sprite("swamp/willOWisp", 6, anim_frame(8, 6), Vector2(630, 130 + sin(flow * 3.0) * 12), 4.0, true)
+	var leaf := Color("2e8b57")
+	for side: float in [1.0, -1.0]:
+		var root := Vector2(360 - side * 360, 60)
+		for i in 4:
+			var a := 0.35 + i * 0.32 + sin(flow * 2.0 + i) * 0.04
+			var tip := root + Vector2(side * cos(a), sin(a)) * (150.0 - i * 18.0)
+			var mid := root.lerp(tip, 0.5)
+			var n := Vector2(-(tip - root).y, (tip - root).x).normalized() * 22.0
+			draw_colored_polygon(PackedVector2Array([root, mid + n, tip, mid - n]), leaf.lightened(i * 0.06))
 
 
 func _draw_salmon(pos: Vector2, hurt: bool, angle: float) -> void:

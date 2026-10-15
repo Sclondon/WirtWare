@@ -1,6 +1,6 @@
 extends Microgame
 ## SLIDE! Belly-slide a penguin down the slope through every gate.
-## A homage to Penguin Slide. Rocks (graves, totems, barrels) sit beside the line on harder levels.
+## A homage to Penguin Slide. Rocks sit beside the line on harder levels.
 
 const PENGUIN_Y := 330.0
 const STEER_SPEED := 820.0
@@ -8,9 +8,6 @@ const STEER_ACCEL := 5200.0
 const BODY_RADIUS := 26.0
 const ROCK_RADIUS := 40.0
 const FISH_RADIUS := 64.0
-## Per stage: [art path, frames, frame, scale] for the rocks.
-const ROCKS := [["graveyard/grave_2", 1, 0, 3.0], ["temple/t_totem_heads", 3, 1, 4.0], ["swamp/toxic_barrel", 1, 0, 5.0]]
-
 var penguin_x := 360.0
 var velocity_x := 0.0
 var speed := 600.0
@@ -36,7 +33,7 @@ func _init() -> void:
 
 
 func _on_start() -> void:
-	theme = Stages.theme(stage)
+	theme = Stages.LOOKS.penguin
 	speed = 480.0 + 80.0 * difficulty
 	gate_gap = [300.0, 250.0, 215.0][difficulty - 1]
 	var interval: float = [0.85, 0.75, 0.68][difficulty - 1]
@@ -133,7 +130,7 @@ func _crash(at: Vector2) -> void:
 
 
 func _draw() -> void:
-	# Snow, tinted toward the stage's sky, with the stage's ground showing in the tree lines.
+	# Snow, with a hint of sky in it.
 	var snow := Color("eef4ff").lerp(theme.sky_low, 0.18)
 	draw_rect(Rect2(Vector2.ZERO, SCREEN), snow)
 	for i in 10:
@@ -151,9 +148,8 @@ func _draw() -> void:
 
 	if not fish_taken:
 		_draw_fish(fish)
-	var rock: Array = ROCKS[posmod(stage, 3)]
 	for r in rocks:
-		draw_sprite(rock[0], rock[1], rock[2], r, rock[3])
+		_draw_rock(r)
 
 	for i in gates.size():
 		var gate := gates[i]
@@ -209,3 +205,10 @@ func _draw_penguin() -> void:
 	draw_face(Vector2(0, 42), 30, not crashed)
 	draw_colored_polygon(PackedVector2Array([Vector2(-9, 58), Vector2(9, 58), Vector2(0, 74)]), Color("ff9f1c"))
 	draw_set_transform(Vector2.ZERO)
+
+
+## A grey boulder with snow on top.
+func _draw_rock(at: Vector2) -> void:
+	draw_colored_polygon(ellipse_points(at + Vector2(0, 6), Vector2(46, 30)), Color("6e7b8a"))
+	draw_colored_polygon(ellipse_points(at + Vector2(-8, 0), Vector2(30, 20)), Color("8a97a6"))
+	draw_colored_polygon(ellipse_points(at + Vector2(-4, -16), Vector2(28, 10)), Color("f4f8ff"))

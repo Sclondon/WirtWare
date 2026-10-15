@@ -31,7 +31,7 @@ func _init() -> void:
 
 
 func _on_start() -> void:
-	theme = Stages.theme(stage)
+	theme = Stages.LOOKS.wind
 	scroll_speed = [360.0, 430.0, 500.0][difficulty - 1]
 	var interval: float = [1.2, 1.0, 0.85][difficulty - 1]
 	var width: float = [300.0, 250.0, 215.0][difficulty - 1]

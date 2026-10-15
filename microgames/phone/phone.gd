@@ -37,7 +37,7 @@ func _init() -> void:
 
 
 func _on_start() -> void:
-	theme = Stages.theme(stage)
+	theme = Stages.LOOKS.phone_home
 	# Real time shrinks as the game speeds up, so ease off the press count.
 	needed = roundf((5.0 + 3.0 * difficulty) / sqrt(Engine.time_scale))
 	decay = 0.4 * difficulty
@@ -111,14 +111,14 @@ func _draw() -> void:
 		var p := Vector2(fmod(i * 137.0, 720.0), 100.0 + fmod(i * 251.0, 700.0))
 		draw_circle(p, 2.0 + (i % 3), Color(1, 1, 1, 0.35 + 0.3 * sin(_clock * 3.0 + i)))
 
-	# The big full moon, in the stage's glow colour.
+	# The big full moon.
 	var moon: Color = theme.glow.lightened(0.35)
 	draw_circle(MOON_POS, MOON_R + 30, Color(moon, 0.15))
 	draw_circle(MOON_POS, MOON_R, moon)
 	for c: Vector3 in [Vector3(-80, -60, 46), Vector3(70, 40, 34), Vector3(-30, 110, 26), Vector3(110, -120, 22)]:
 		draw_circle(MOON_POS + Vector2(c.x, c.y), c.z, moon.darkened(0.08))
 
-	# Far hill with the stage's skyline, then the road.
+	# Far hill with the suburb on it, then the road.
 	var hill := PackedVector2Array([Vector2(0, 880)])
 	for i in 13:
 		var x := i * 60.0
@@ -143,19 +143,14 @@ func _draw() -> void:
 	_draw_bike(bike_pos, bike_tilt)
 
 
+## Crescent Valley's suburb on the hill: house roofs and pines against the sky.
 func _draw_skyline(color: Color) -> void:
-	match posmod(stage, 3):
-		Stages.GRAVEYARD:
-			for x in [90.0, 210.0, 600.0]:
-				draw_sprite("graveyard/grave_2", 1, 0, Vector2(x, 818), 3.0, false, color)
-		Stages.TEMPLE:
-			var base := Vector2(130, 850)
-			for step in 4:
-				var w := 220.0 - step * 50.0
-				draw_rect(Rect2(base.x - w / 2, base.y - (step + 1) * 34.0, w, 36), color)
-		Stages.SWAMP:
-			draw_sprite("swamp/tree_5", 1, 0, Vector2(110, 720), 2.5, false, color)
-			draw_sprite("swamp/tree_5", 1, 0, Vector2(640, 740), 2.0, true, color)
+	for x: float in [70.0, 230.0, 560.0]:
+		draw_rect(Rect2(x - 50, 806, 100, 50), color)
+		draw_colored_polygon(PackedVector2Array([Vector2(x - 62, 808), Vector2(x + 62, 808), Vector2(x, 762)]), color)
+		draw_rect(Rect2(x - 26, 822, 18, 16), Color(theme.glow, 0.5))
+	for x: float in [150.0, 330.0, 670.0]:
+		draw_colored_polygon(PackedVector2Array([Vector2(x - 34, 852), Vector2(x + 34, 852), Vector2(x, 740)]), color)
 
 
 func _draw_van() -> void:

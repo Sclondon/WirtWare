@@ -37,7 +37,7 @@ func _init() -> void:
 
 
 func _on_start() -> void:
-	theme = Stages.theme(stage)
+	theme = Stages.LOOKS.denver
 	robot_speed = [360.0, 420.0, 470.0][difficulty - 1]
 	robot_x = randf_range(100, 560)
 	robot_dir = 1.0 if randf() < 0.5 else -1.0

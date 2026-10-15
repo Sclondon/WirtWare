@@ -45,5 +45,41 @@ const THEMES: Array[Dictionary] = [
 ]
 
 
+## Fixed looks for the microgames that pay homage to a game that isn't spooky.
+## They wear their own game's colours in every stage, never the stage's.
+## Same keys as THEMES, so a microgame can use either.
+const LOOKS := {
+	"salmon_run": {  # Salmon Run 2: a sunny river up through the jungle.
+		"sky": Color("5fb4e8"), "sky_low": Color("c9eef0"),
+		"ground": Color("6f6a5c"), "accent": Color("ff7a52"), "glow": Color("fff3b0"),
+	},
+	"wind": {  # Daughter Of The Wind: a bright sky full of clouds.
+		"sky": Color("4f9fe8"), "sky_low": Color("dff0ff"),
+		"ground": Color("8a7a66"), "accent": Color("d9483b"), "glow": Color("fff8e0"),
+	},
+	"denver": {  # Denver Vs The Universe: a diorama on a table under hanging lamps.
+		"sky": Color("2e2622"), "sky_low": Color("5e4a3a"),
+		"ground": Color("8b5a2b"), "accent": Color("ff5a3c"), "glow": Color("ffe2a0"),
+	},
+	"penguin": {  # Penguin Slide: a snowy slope in daylight.
+		"sky": Color("9fd3ff"), "sky_low": Color("dff1ff"),
+		"ground": Color("2f6b4f"), "accent": Color("ff4f6d"), "glow": Color("ffcf3a"),
+	},
+	"band": {  # One Man Band: a red-curtained stage under a spotlight.
+		"sky": Color("3a1424"), "sky_low": Color("8a2a36"),
+		"ground": Color("6b4428"), "accent": Color("f2c14e"), "glow": Color("fff0c0"),
+		"curtains": [Color("c0392b"), Color("f2c14e"), Color("2a9d8f"), Color("3a86ff")],
+	},
+	"phone_home": {  # Phone Home: a suburb under a big full moon.
+		"sky": Color("0d1b3e"), "sky_low": Color("3a5a8c"),
+		"ground": Color("2b3a2e"), "accent": Color("ff6b3d"), "glow": Color("fff6d8"),
+	},
+	"snow_globe": {  # Snow Globe: a winter night, a cottage and pines.
+		"sky": Color("1d2b4a"), "sky_low": Color("4a6a9a"),
+		"ground": Color("34405e"), "accent": Color("c0392b"), "glow": Color("dff3ff"),
+	},
+}
+
+
 static func theme(stage: int) -> Dictionary:
 	return THEMES[posmod(stage, THEMES.size())]

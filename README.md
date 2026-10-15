@@ -2,7 +2,7 @@
 
 Rapid-fire microgames in the style of WarioWare, made with Godot 4.7.
 
-Each microgame lasts a few seconds. You see a one-word prompt, then you have to work out what to do before the fuse runs out. Win to score, lose to drop a heart. Between games, Wirt (the host, a kid in a floppy cone hat) reacts to how you did.
+Each microgame lasts a few seconds. You see a one-word prompt, then you have to work out what to do before the fuse runs out. Win to score, lose to drop a heart. Between games, the stage's boss hosts: Mr Hat, Tlaloc or the Snail Lord gloats when you lose and fumes when you win. Wirt (a kid in a floppy cone hat) hosts the title screen.
 
 A run has three stages. Each stage is 10 microgames and then a boss. Every 4 wins within a stage the game speeds up. Beating a boss is worth 5 points and gives a heart back. Losing to a boss costs a heart, and you fight it again. After the third boss the run loops back to stage one, faster and at full difficulty.
 
@@ -26,7 +26,7 @@ WirtWare is portrait-first: the game is a 720×1280 (9:16) canvas, laid out for 
 
 ## Microgames
 
-Most microgames change their look per stage, using the stage's art.
+Most microgames change their look per stage, using the stage's art. The homage microgames (below) keep the look of the game they pay homage to in every stage, so only the homages to spooky games look spooky.
 
 | Prompt | Folder | What you do |
 | --- | --- | --- |
@@ -73,7 +73,8 @@ scripts/main.gd             Game loop: stages, bosses, intermissions, speed-ups,
 scripts/stages.gd           The three stages: names, colours, art folder, boss
 scripts/microgame.gd        `Microgame` base class that every game and boss extends
 scripts/microgame_fx.gd     Sparks and floating words drawn over a microgame
-scripts/mascot.gd           Wirt, the host, drawn and animated in code
+scripts/mascot.gd           Wirt, who hosts the title screen, drawn and animated in code
+scripts/boss_host.gd        The stage's boss hosting between games, acting out the same moods
 scripts/backdrop.gd         The between-games scene for each stage
 scripts/sfx.gd              Sfx autoload: sound effects, jingles and stage music, made in code
 scripts/hearts.gd           Lives display

@@ -1,6 +1,6 @@
 extends Node
 ## Main loop. A run is three stages (see Stages), each a set of microgames and
-## then a boss, with Wirt the mascot reacting between games. After the third
+## then a boss, with the stage's boss hosting between games (Wirt hosts the title). After the third
 ## boss it loops back to stage one, faster.
 ##
 ## Microgames are found automatically: any `res://microgames/<name>/<name>.tscn`
@@ -51,6 +51,7 @@ var touch: TouchControls
 var curtain: Control
 var backdrop: Backdrop
 var mascot: Mascot
+var host: BossHost
 var stage_label: Label
 var big_label: Label
 var small_label: Label
@@ -188,7 +189,7 @@ func _stage_intro() -> void:
 	stage_label.text = ""
 	small_label.text = ("LAP %d · STAGE %d" % [lap + 1, stage + 1]) if lap > 0 else "STAGE %d" % (stage + 1)
 	_set_big_text(Stages.theme(stage).name, 96)
-	mascot.mood = "wave"
+	_host("wave")
 	_pop(small_label)
 	_pop(big_label)
 	Sfx.jingle("stage")
@@ -202,14 +203,14 @@ func _intermission(first: bool, last_won: bool) -> void:
 	_set_big_text(str(score), 200)
 	if first:
 		small_label.text = "GET READY!"
-		mascot.mood = "idle"
+		_host("idle")
 	elif last_won:
 		small_label.text = "NICE!"
-		mascot.mood = "cheer"
+		_host("cheer")
 		Sfx.jingle("win", speed)
 	else:
 		small_label.text = "OOPS!"
-		mascot.mood = "oops"
+		_host("oops")
 		Sfx.jingle("lose", speed)
 	hearts.count = lives if (first or last_won) else lives + 1
 	_pop(small_label)
@@ -229,10 +230,17 @@ func _intermission(first: bool, last_won: bool) -> void:
 		speed = minf(speed + SPEEDUP_STEP, MAX_SPEED)
 		Engine.time_scale = speed
 		small_label.text = "SPEED UP!"
-		mascot.mood = "panic"
+		_host("panic")
 		_pop(small_label)
 		Sfx.jingle("speed", speed)
 		await _wait(1.0)
+
+
+## Between games the stage's boss hosts, in Wirt's place.
+func _host(mood: String) -> void:
+	mascot.visible = false
+	host.stage = stage
+	host.mood = mood
 
 
 func _per_stage() -> int:
@@ -247,7 +255,7 @@ func _boss_intro() -> void:
 	stage_label.text = theme.name
 	small_label.text = "BOSS STAGE!"
 	_set_big_text(theme.boss_name, 120)
-	mascot.mood = "scared"
+	_host("scared")
 	_pop(small_label)
 	Sfx.jingle("boss")
 	var tween := create_tween()
@@ -264,7 +272,7 @@ func _stage_clear() -> void:
 	hearts.visible = true
 	small_label.text = "%s BEATEN!" % Stages.theme(stage).boss_name
 	_set_big_text(str(score), 200)
-	mascot.mood = "victory"
+	_host("victory")
 	_pop(small_label)
 	_pop(big_label)
 	Sfx.jingle("boss_win")
@@ -341,7 +349,7 @@ func _game_over() -> void:
 	stage_label.text = "REACHED %s" % Stages.theme(stage).name
 	_set_big_text("GAME OVER", 104)
 	small_label.text = "SCORE %d   BEST %d" % [score, best]
-	mascot.mood = "dead"
+	_host("dead")
 	_pop(big_label)
 	Sfx.jingle("gameover")
 	# Short delay so frantic mashing doesn't instantly restart.
@@ -358,6 +366,8 @@ func _show_title() -> void:
 	stage_label.text = ""
 	_set_big_text("WIRTWARE", 120)
 	small_label.text = "BEST %d" % best if best > 0 else "3 STAGES · 3 BOSSES"
+	mascot.visible = true
+	host.visible = false
 	mascot.mood = "wave"
 	hint_label.text = _start_hint()
 	_place(hint_label, 1210)
@@ -437,6 +447,10 @@ func _build_hud() -> void:
 	mascot.position = MASCOT_POS
 	mascot.scale = Vector2(0.95, 0.95)
 	curtain.add_child(mascot)
+	host = BossHost.new()
+	host.position = MASCOT_POS
+	host.visible = false
+	curtain.add_child(host)
 
 	stage_label = _make_label(34, curtain, 110)
 	stage_label.modulate = Color(1, 1, 1, 0.85)

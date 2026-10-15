@@ -34,7 +34,7 @@ func _init() -> void:
 
 
 func _on_start() -> void:
-	theme = Stages.theme(stage)
+	theme = Stages.LOOKS.band
 	colors = [theme.accent]
 	for c: Color in theme.curtains:
 		colors.append(c)
@@ -196,7 +196,7 @@ func _draw_band() -> void:
 	var bounce := -kick * 14.0 + (sin(_clock * 18.0) * 6.0 if is_resolved and won else 0.0)
 	var c := BAND_POS + Vector2(0, bounce)
 	var drum := c + Vector2(0, -10)
-	# Bass drum strapped on his back, with the stage's colours on the rim.
+	# Bass drum strapped on his back, with brass on the rim.
 	draw_circle(drum, 128, Color("2b2b2b"))
 	draw_circle(drum, 118, theme.accent.darkened(0.2))
 	draw_circle(drum, 98, Color("f3e9d2"))
