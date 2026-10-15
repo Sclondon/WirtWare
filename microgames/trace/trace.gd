@@ -42,7 +42,7 @@ func _process(delta: float) -> void:
 	elapsed += delta
 	update_pointer()
 	if is_playing():
-		if pointer_pressed and pointer.distance_to(path[progress]) < width * 1.5:
+		if pointer_down and not tracing and pointer.distance_to(path[progress]) < width * 1.5:
 			if not tracing:
 				Sfx.play("tap")
 			tracing = true

@@ -103,11 +103,37 @@ func _resolve(result: bool) -> void:
 
 
 func update_pointer() -> void:
-	var down := Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
-	pointer = get_local_mouse_position()
+	var down := Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) or _touch_down
+	pointer = _touch_pos if _touch_down else get_local_mouse_position()
 	pointer_pressed = down and not pointer_down
 	pointer_released = pointer_down and not down
 	pointer_down = down
+
+
+# Touches are read here as well as through the emulated mouse: some phones
+# (seen on an iPhone) never deliver the finger going down, only the drag, and
+# then the emulated mouse button is never pressed. A drag from any finger
+# counts as that finger being down.
+var _touch_down := false
+var _touch_pos := Vector2.ZERO
+var _touch_index := -1
+
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventScreenTouch:
+		if event.pressed:
+			_touch_index = event.index
+			_touch_down = true
+			_touch_pos = (make_input_local(event) as InputEventScreenTouch).position
+		elif event.index == _touch_index or _touch_index < 0:
+			_touch_down = false
+			_touch_index = -1
+	elif event is InputEventScreenDrag:
+		if _touch_index < 0:
+			_touch_index = event.index
+		if event.index == _touch_index:
+			_touch_down = true
+			_touch_pos = (make_input_local(event) as InputEventScreenDrag).position
 
 
 ## Shakes the whole game screen (8 = a bump, 20 = a crash).
