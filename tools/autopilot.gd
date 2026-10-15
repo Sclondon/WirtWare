@@ -16,10 +16,13 @@ var current: Microgame
 var held := {}  # action -> true while pressed
 var tap_release: Array[String] = []
 var poke_timer := 0.0
+## True when the run was started with --game=, so that game is left alone.
+var fixed_game := false
 
 
 func _ready() -> void:
 	main = get_parent()
+	fixed_game = main.debug_microgame != null
 	_queue_next_game()
 	await get_tree().create_timer(0.6).timeout
 	main._run()
@@ -89,6 +92,8 @@ func _process(delta: float) -> void:
 
 
 func _queue_next_game() -> void:
+	if fixed_game:
+		return
 	var name := PLAYLIST[next_game % PLAYLIST.size()]
 	next_game += 1
 	main.debug_microgame = load("res://microgames/%s/%s.tscn" % [name, name])

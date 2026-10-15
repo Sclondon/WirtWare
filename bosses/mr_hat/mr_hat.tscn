@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://bosses/mr_hat/mr_hat.gd" id="1"]
+
+[node name="mr_hat" type="Node2D"]
+script = ExtResource("1")

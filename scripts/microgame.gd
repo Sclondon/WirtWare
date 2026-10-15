@@ -11,6 +11,8 @@ extends Node2D
 ## everything (timers, tweens, the countdown) speeds up together.
 
 signal resolved(won: bool)
+## Asks main.gd to shake the screen. Use shake() rather than emitting this.
+signal shake_requested(strength: float)
 
 ## Which on-screen touch controls this microgame needs on phones.
 ## POINTER games use the mouse, which touch drives directly, so they show no buttons.
@@ -33,6 +35,16 @@ const CONTROLS_TOP := 1060.0
 @export var duration := 4.0
 ## Result when the timer runs out without win() or lose() being called.
 @export var win_on_timeout := false
+## Bosses end a stage. They live in res://bosses/ (not in the normal rotation),
+## run longer, and losing one costs a heart and replays it.
+@export var is_boss := false
+
+## Which stage (Stages.GRAVEYARD / TEMPLE / SWAMP) this round is played in. Set
+## by the main loop before start(); use it, and Stages.theme(stage), to dress
+## the game in that stage's art.
+var stage := 0
+## Sparks, score pops and other effects drawn over the game. See burst() and popup().
+var fx: MicrogameFx
 
 ## Viewport units per screen pixel, kept up to date by main.gd. A portrait
 ## phone squeezes the 1280-wide game into ~400px, so touch targets use this to
@@ -56,6 +68,9 @@ var pointer_released := false
 
 func start() -> void:
 	active = true
+	fx = MicrogameFx.new()
+	fx.z_index = 50
+	add_child(fx)
 	_on_start()
 
 
@@ -93,6 +108,23 @@ func update_pointer() -> void:
 	pointer_pressed = down and not pointer_down
 	pointer_released = pointer_down and not down
 	pointer_down = down
+
+
+## Shakes the whole game screen (8 = a bump, 20 = a crash).
+func shake(strength := 12.0) -> void:
+	shake_requested.emit(strength)
+
+
+## Throws [param count] sparks out from [param pos].
+func burst(pos: Vector2, color: Color, count := 12, speed := 420.0, size := 10.0) -> void:
+	if fx:
+		fx.burst(pos, color, count, speed, size)
+
+
+## Floats a word (or "+1") up from [param pos].
+func popup(text: String, pos: Vector2, color := Color.WHITE, font_size := 56) -> void:
+	if fx:
+		fx.popup(text, pos, color, font_size)
 
 
 ## A size of at least [param units] in game space, and at least [param pixels]
@@ -158,6 +190,46 @@ static func ellipse_points(center: Vector2, radii: Vector2, from := 0.0, to := T
 		var angle := lerpf(from, to, float(i) / segments)
 		points.append(center + Vector2(cos(angle), sin(angle)) * radii)
 	return points
+
+
+## Loads arcade art from res://art, e.g. art("graveyard/ghost"). Cached.
+static func art(path: String) -> Texture2D:
+	if not _art_cache.has(path):
+		_art_cache[path] = load("res://art/%s.png" % path)
+	return _art_cache[path]
+
+static var _art_cache := {}
+
+
+## Draws frame [param frame] of a horizontal sprite strip with [param frames]
+## frames, centred on [param center], [param scale] times its pixel size.
+## The art is pixel art and the project filters textures with nearest.
+func draw_sprite(path: String, frames: int, frame: int, center: Vector2, scale: float,
+		flip := false, tint := Color.WHITE, rotation := 0.0) -> void:
+	var tex := art(path)
+	var w := tex.get_width() / float(frames)
+	var h := float(tex.get_height())
+	var src := Rect2(w * posmod(frame, frames), 0, w, h)
+	draw_set_transform(center, rotation, Vector2(-scale if flip else scale, scale))
+	draw_texture_rect_region(tex, Rect2(-w / 2, -h / 2, w, h), src, tint)
+	draw_set_transform(Vector2.ZERO)
+
+
+## The frame to show for an animation running at [param fps], from the
+## microgame's own clock (so speed-ups speed it up too).
+func anim_frame(fps: float, frames: int, offset := 0.0) -> int:
+	return int((_clock + offset) * fps) % frames
+
+var _clock := 0.0
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_INTERNAL_PROCESS:
+		_clock += get_process_delta_time()
+
+
+func _enter_tree() -> void:
+	set_process_internal(true)
 
 
 static func circle_hits_rect(center: Vector2, radius: float, rect: Rect2) -> bool:
